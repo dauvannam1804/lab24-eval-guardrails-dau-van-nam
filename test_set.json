@@ -1,0 +1,22 @@
+[
+    {
+        "question": "Bảo vệ dữ liệu cá nhân là gì theo Nghị định 13?",
+        "ground_truth": "Bảo vệ dữ liệu cá nhân là hoạt động phòng ngừa, phát hiện, ngăn chặn, xử lý hành vi vi phạm liên quan đến dữ liệu cá nhân theo quy định của pháp luật."
+    },
+    {
+        "question": "Nghị định 13/2023/NĐ-CP áp dụng cho những đối tượng nào?",
+        "ground_truth": "Áp dụng cho cơ quan, tổ chức, cá nhân Việt Nam; cơ quan, tổ chức, cá nhân nước ngoài tại Việt Nam; cơ quan, tổ chức, cá nhân Việt Nam hoạt động tại nước ngoài; cơ quan, tổ chức, cá nhân nước ngoài trực tiếp tham gia hoặc có liên quan đến hoạt động xử lý dữ liệu cá nhân tại Việt Nam."
+    },
+    {
+        "question": "Dữ liệu cá nhân cơ bản bao gồm những thông tin gì?",
+        "ground_truth": "Bao gồm: Họ, chữ đệm và tên khai sinh; Ngày, tháng, năm sinh; Ngày, tháng, năm chết hoặc mất tích; Giới tính; Nơi sinh, nơi đăng ký khai sinh, nơi thường trú, nơi tạm trú, nơi ở hiện tại, quê quán, địa chỉ liên hệ; Quốc tịch; Hình ảnh của cá nhân; Số điện thoại, số chứng minh nhân dân, số định danh cá nhân, số hộ chiếu, số giấy phép lái xe, số biển số xe, số mã số thuế cá nhân, số bảo hiểm xã hội, số thẻ bảo hiểm y tế; Tình trạng hôn nhân; Thông tin về mối quan hệ gia đình (cha mẹ, con cái); Thông tin về tài khoản số của cá nhân; dữ liệu cá nhân phản ánh hoạt động, lịch sử hoạt động trên không gian mạng; Các thông tin khác gắn liền với một con người cụ thể hoặc giúp xác định một con người cụ thể không thuộc Dữ liệu cá nhân nhạy cảm."
+    },
+    {
+        "question": "Xử lý dữ liệu cá nhân bao gồm những hoạt động nào?",
+        "ground_truth": "Xử lý dữ liệu cá nhân là một hoặc nhiều hoạt động tác động tới dữ liệu cá nhân, như: thu thập, ghi, phân tích, xác nhận, lưu trữ, chỉnh sửa, công khai, kết hợp, truy cập, truy xuất, thu hồi, mã hóa, giải mã, sao chép, chia sẻ, truyền đưa, cung cấp, chuyển giao, xóa, hủy dữ liệu cá nhân hoặc các hành động khác có liên quan."
+    },
+    {
+        "question": "Tổng cộng tài sản của công ty tại thời điểm báo cáo là bao nhiêu?",
+        "ground_truth": "Bạn cần kiểm tra số liệu tại mục 'TỔNG CỘNG TÀI SẢN' trong Bảng cân đối kế toán của file BCTC.md để có con số chính xác."
+    }
+]

@@ -1,0 +1,16 @@
+python-dotenv
+qdrant-client
+sentence-transformers
+openai
+cohere
+rank_bm25
+underthesea
+ragas
+datasets
+pandas
+pytest
+langchain-openai
+presidio-analyzer
+presidio-anonymizer
+git+https://github.com/guardrails-ai/guardrails.git
+transformers
