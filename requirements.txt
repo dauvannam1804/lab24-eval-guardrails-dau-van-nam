@@ -14,3 +14,4 @@ presidio-analyzer
 presidio-anonymizer
 git+https://github.com/guardrails-ai/guardrails.git
 transformers
+rapidfuzz
