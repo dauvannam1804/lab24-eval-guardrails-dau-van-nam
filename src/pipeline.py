@@ -68,6 +68,7 @@ def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) 
     # 3. Generation (LLM)
     from openai import OpenAI
     from config import OPENAI_API_KEY
+    from src.m6_guardrails import run_all_guardrails
     
     client = OpenAI(api_key=OPENAI_API_KEY)
     context_str = "\n\n".join([f"--- Context {i+1} ---\n{c}" for i, c in enumerate(contexts)])
@@ -82,11 +83,18 @@ def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) 
                 Trả lời bằng tiếng Việt, súc tích và chính xác."""},
                 {"role": "user", "content": f"Ngữ cảnh:\n{context_str}\n\nCâu hỏi: {query}"},
             ],
-            temperature=0.1, # Giảm sáng tạo để tăng tính trung thực
+            temperature=0.1,
         )
         answer = resp.choices[0].message.content.strip()
+        
+        # 4. Guardrail Verification (Phase B.3)
+        guard_result = run_all_guardrails(query, answer, contexts)
+        if not guard_result["passed"]:
+            print(f"  ⚠️ Guardrail Rejected: {guard_result['details']['hallucination']['reason']}")
+            answer = "Tôi xin lỗi, nhưng tôi không thể tìm thấy thông tin chính xác và tin cậy trong tài liệu để trả lời câu hỏi này."
+            
     except Exception as e:
-        print(f"Error in LLM Generation: {e}")
+        print(f"Error in LLM Generation/Guardrail: {e}")
         answer = contexts[0] if contexts else "Không tìm thấy thông tin."
         
     return answer, contexts
