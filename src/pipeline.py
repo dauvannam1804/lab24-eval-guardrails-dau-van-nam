@@ -55,16 +55,20 @@ def build_pipeline():
     return search, reranker
 
 
-def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) -> tuple[str, list[str]]:
-    """Run single query through pipeline."""
-    # 1. Retrieval (Hybrid)
+from langfuse import observe
+
+@observe()
+def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker):
+    """Run full RAG pipeline: Hybrid Search -> Rerank -> Generation -> Guardrail."""
+    
+    # 1. Search (Hybrid: BM25 + Dense)
     results = search.search(query)
     
     # 2. Reranking
     docs = [{"text": r.text, "score": r.score, "metadata": r.metadata} for r in results]
     reranked = reranker.rerank(query, docs, top_k=RERANK_TOP_K)
     contexts = [r.text for r in reranked] if reranked else [r.text for r in results[:3]]
-
+    
     # 3. Generation (LLM)
     from openai import OpenAI
     from config import OPENAI_API_KEY
@@ -74,6 +78,7 @@ def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) 
     context_str = "\n\n".join([f"--- Context {i+1} ---\n{c}" for i, c in enumerate(contexts)])
     
     try:
+        # Trace bước LLM Generation
         resp = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -89,6 +94,7 @@ def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) 
         
         # 4. Guardrail Verification (Phase B.3)
         guard_result = run_all_guardrails(query, answer, contexts)
+        
         if not guard_result["passed"]:
             print(f"  ⚠️ Guardrail Rejected: {guard_result['details']['hallucination']['reason']}")
             answer = "Tôi xin lỗi, nhưng tôi không thể tìm thấy thông tin chính xác và tin cậy trong tài liệu để trả lời câu hỏi này."

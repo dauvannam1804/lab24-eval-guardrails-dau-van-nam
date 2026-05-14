@@ -9,6 +9,11 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY", "")
 
+# --- Langfuse ---
+LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY", "")
+LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "")
+LANGFUSE_BASE_URL = os.getenv("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+
 # --- Qdrant ---
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
