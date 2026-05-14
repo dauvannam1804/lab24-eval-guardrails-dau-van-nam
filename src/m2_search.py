@@ -1,6 +1,6 @@
 """Module 2: Hybrid Search — BM25 (Vietnamese) + Dense + RRF."""
 
-import os, sys
+import os, sys, time
 from dataclasses import dataclass
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -77,12 +77,21 @@ class DenseSearch:
         )
         
         texts = [c["text"] for c in chunks]
-        response = self._get_encoder().embed(
-            texts=texts,
-            model=EMBEDDING_MODEL,
-            input_type="search_document"
-        )
-        vectors = response.embeddings
+        
+        # Batching cực kỳ cẩn thận cho Cohere trial (100k tokens per minute)
+        batch_size = 20
+        vectors = []
+        for i in range(0, len(texts), batch_size):
+            batch_texts = texts[i : i + batch_size]
+            print(f"    - Embedding batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}...", flush=True)
+            response = self._get_encoder().embed(
+                texts=batch_texts,
+                model=EMBEDDING_MODEL,
+                input_type="search_document"
+            )
+            vectors.extend(response.embeddings)
+            if i + batch_size < len(texts):
+                time.sleep(2) # Nghỉ 2 giây để reset rate limit cửa sổ trượt
         
         points = []
         for i, (vector, chunk) in enumerate(zip(vectors, chunks)):
