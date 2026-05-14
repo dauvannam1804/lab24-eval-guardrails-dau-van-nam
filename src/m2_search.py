@@ -63,81 +63,50 @@ class DenseSearch:
 
     def _get_encoder(self):
         if self._encoder is None:
-            import cohere
-            from config import COHERE_API_KEY
-            self._encoder = cohere.Client(COHERE_API_KEY)
+            from sentence_transformers import SentenceTransformer
+            self._encoder = SentenceTransformer(EMBEDDING_MODEL)
         return self._encoder
 
     def index(self, chunks: list[dict], collection: str = COLLECTION_NAME) -> None:
-        """Index chunks into Qdrant."""
-        # recreate_collection xóa sạch collection cũ nếu đã tồn tại
+        """Index chunks into Qdrant using Local Embeddings."""
         self.client.recreate_collection(
             collection_name=collection,
             vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
         )
         
         texts = [c["text"] for c in chunks]
+        print(f"    - Embedding {len(texts)} chunks locally...", flush=True)
         
-        # Batching cực kỳ cẩn thận cho Cohere trial (100k tokens per minute)
-        batch_size = 20
-        vectors = []
-        for i in range(0, len(texts), batch_size):
-            batch_texts = texts[i : i + batch_size]
-            print(f"    - Embedding batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}...", flush=True)
-            response = self._get_encoder().embed(
-                texts=batch_texts,
-                model=EMBEDDING_MODEL,
-                input_type="search_document"
-            )
-            vectors.extend(response.embeddings)
-            if i + batch_size < len(texts):
-                time.sleep(2) # Nghỉ 2 giây để reset rate limit cửa sổ trượt
+        # Chạy trực tiếp trên máy, không cần batching 20 nữa
+        vectors = self._get_encoder().encode(texts, show_progress_bar=True)
         
         points = []
         for i, (vector, chunk) in enumerate(zip(vectors, chunks)):
             points.append(PointStruct(
                 id=i,
-                vector=vector,
+                vector=vector.tolist(), # Convert numpy to list
                 payload={**chunk["metadata"], "text": chunk["text"]}
             ))
         
         self.client.upsert(collection_name=collection, points=points)
 
     def search(self, query: str, top_k: int = DENSE_TOP_K, collection: str = COLLECTION_NAME) -> list[SearchResult]:
-        """Search using dense vectors."""
-        # Retry logic cho Cohere Trial Key (10 calls/min)
-        max_retries = 5
-        for attempt in range(max_retries):
-            try:
-                response = self._get_encoder().embed(
-                    texts=[query],
-                    model=EMBEDDING_MODEL,
-                    input_type="search_query"
-                )
-                query_vector = response.embeddings[0]
-                
-                # Dùng query_points - API mới nhất của Qdrant
-                response = self.client.query_points(
-                    collection_name=collection,
-                    query=query_vector,
-                    limit=top_k
-                )
-                hits = response.points
-                
-                return [SearchResult(
-                    text=hit.payload["text"],
-                    score=hit.score,
-                    metadata=hit.payload,
-                    method="dense"
-                ) for hit in hits]
-            except Exception as e:
-                if "429" in str(e) or "too_many_requests" in str(e).lower():
-                    wait_time = (attempt + 1) * 10
-                    print(f"    ⚠️ Cohere rate limit hit in search. Waiting {wait_time}s... (Attempt {attempt+1}/{max_retries})", flush=True)
-                    time.sleep(wait_time)
-                else:
-                    raise e
-        return []
+        """Search using local dense vectors."""
+        query_vector = self._get_encoder().encode([query])[0]
+        
+        response = self.client.query_points(
+            collection_name=collection,
+            query=query_vector.tolist(),
+            limit=top_k
+        )
+        hits = response.points
+        
+        return [SearchResult(
+            text=hit.payload["text"],
+            score=hit.score,
+            metadata=hit.payload,
+            method="dense"
+        ) for hit in hits]
 
 
 def reciprocal_rank_fusion(results_list: list[list[SearchResult]], k: int = 60,

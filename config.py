@@ -15,9 +15,9 @@ QDRANT_PORT = 6333
 COLLECTION_NAME = "lab18_production"
 NAIVE_COLLECTION = "lab18_naive"
 
-# --- Embedding ---
-EMBEDDING_MODEL = "embed-multilingual-v3.0"
-EMBEDDING_DIM = 1024
+# --- Embedding (Local alternatives) ---
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_DIM = 384
 
 # --- Chunking ---
 HIERARCHICAL_PARENT_SIZE = 2048

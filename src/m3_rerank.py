@@ -17,57 +17,49 @@ class RerankResult:
 
 
 class CrossEncoderReranker:
-    def __init__(self, model_name: str = "rerank-v3.5"):
+    def __init__(self, model_name: str = "ms-marco-MiniLM-L-12-v2"):
         self.model_name = model_name
-        self._client = None
+        self._ranker = None
 
-    def _get_client(self):
-        if self._client is None:
-            import cohere
-            from config import COHERE_API_KEY
-            self._client = cohere.Client(COHERE_API_KEY)
-        return self._client
+    def _get_ranker(self):
+        if self._ranker is None:
+            from flashrank import Ranker
+            # FlashRank sẽ tự động download model nhẹ về máy
+            self._ranker = Ranker(model_name=self.model_name, cache_dir="flashrank_cache")
+        return self._ranker
 
     def rerank(self, query: str, documents: list[dict], top_k: int = RERANK_TOP_K) -> list[RerankResult]:
-        """Rerank documents using Cohere Rerank API."""
+        """Rerank documents using FlashRank (Local)."""
         if not documents: return []
         
-        co = self._get_client()
+        ranker = self._get_ranker()
         
-        # Prepare passages for Cohere
-        passages = [doc["text"] for doc in documents]
+        # FlashRank yêu cầu format: {"id":..., "text":..., "metadata":...}
+        passages = []
+        for i, doc in enumerate(documents):
+            passages.append({
+                "id": i,
+                "text": doc["text"],
+                "metadata": doc.get("metadata", {})
+            })
+            
+        from flashrank import RerankRequest
+        rank_request = RerankRequest(query=query, passages=passages)
+        results_raw = ranker.rerank(rank_request)
         
-        # Retry logic cho Cohere Trial Key (10 calls/min)
-        max_retries = 5
-        for attempt in range(max_retries):
-            try:
-                response = co.rerank(
-                    model=self.model_name,
-                    query=query,
-                    documents=passages,
-                    top_n=top_k
-                )
-                
-                results = []
-                for i, hit in enumerate(response.results):
-                    # hit.index là vị trí ban đầu của document trong list passages
-                    original_doc = documents[hit.index]
-                    results.append(RerankResult(
-                        text=original_doc["text"],
-                        original_score=original_doc.get("score", 0.0),
-                        rerank_score=float(hit.relevance_score),
-                        metadata=original_doc.get("metadata", {}),
-                        rank=i + 1
-                    ))
-                return results
-            except Exception as e:
-                if "429" in str(e) or "too_many_requests" in str(e).lower():
-                    wait_time = (attempt + 1) * 12
-                    print(f"    ⚠️ Cohere rate limit hit in rerank. Waiting {wait_time}s... (Attempt {attempt+1}/{max_retries})", flush=True)
-                    time.sleep(wait_time)
-                else:
-                    raise e
-        return []
+        # Chỉ lấy top_k
+        results_raw = results_raw[:top_k]
+        
+        results = []
+        for i, hit in enumerate(results_raw):
+            results.append(RerankResult(
+                text=hit["text"],
+                original_score=0.0, # FlashRank không dùng original score trực tiếp
+                rerank_score=float(hit["score"]),
+                metadata=hit.get("metadata", {}),
+                rank=i + 1
+            ))
+        return results
 
 
 class FlashrankReranker:
