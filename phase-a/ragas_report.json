@@ -1,0 +1,81 @@
+{
+  "aggregate": {
+    "faithfulness": 0.425,
+    "answer_relevancy": 0.421612450403922,
+    "context_precision": NaN,
+    "context_recall": 0.5294117647058824
+  },
+  "num_questions": 51,
+  "failures": [
+    {
+      "question": "Langfuse là gì và nó có vai trò gì trong việc thiết lập pipeline đánh giá tự động?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "Nêu các mục tiêu benchmark tối thiểu (Min OK) cho 4 chỉ số RAGAS trong Task A.2?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "YAML là gì và tại sao nó quan trọng trong lập trình?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "VN_PII là gì và tại sao nó quan trọng trong việc bảo vệ thông tin cá nhân?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "VN regex là gì và nó được sử dụng trong ngữ cảnh nào trong phát triển công nghệ giáo dục?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "Mục đích chính của ML trong lĩnh vực AI là gì?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "Làm thế nào để thực hiện phân tích metrics trong hệ thống guardrail và đảm bảo rằng nó hoạt động hiệu quả?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "Làm thế nào để sử dụng AI assistant trong quá trình tạo bộ câu hỏi tổng hợp và đảm bảo chất lượng của nó?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "Làm thế nào để sử dụng AI assistant trong quá trình tạo bộ câu hỏi tổng hợp và đảm bảo chất lượng của nó trong lab này?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    },
+    {
+      "question": "Làm thế nào để thực hiện phân tích cụm thất bại (Failure Cluster Analysis) và giảm thiểu thiên lệch (Bias mitigation) trong hệ thống đánh giá AI?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating (Ảo giác)",
+      "suggested_fix": "Tighten prompt, lower temperature, or check if context is contradictory"
+    }
+  ]
+}
