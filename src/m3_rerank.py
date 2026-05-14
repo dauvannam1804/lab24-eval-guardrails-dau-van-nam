@@ -37,25 +37,37 @@ class CrossEncoderReranker:
         # Prepare passages for Cohere
         passages = [doc["text"] for doc in documents]
         
-        response = co.rerank(
-            model=self.model_name,
-            query=query,
-            documents=passages,
-            top_n=top_k
-        )
-        
-        results = []
-        for i, hit in enumerate(response.results):
-            # hit.index là vị trí ban đầu của document trong list passages
-            original_doc = documents[hit.index]
-            results.append(RerankResult(
-                text=original_doc["text"],
-                original_score=original_doc.get("score", 0.0),
-                rerank_score=float(hit.relevance_score),
-                metadata=original_doc.get("metadata", {}),
-                rank=i + 1
-            ))
-        return results
+        # Retry logic cho Cohere Trial Key (10 calls/min)
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                response = co.rerank(
+                    model=self.model_name,
+                    query=query,
+                    documents=passages,
+                    top_n=top_k
+                )
+                
+                results = []
+                for i, hit in enumerate(response.results):
+                    # hit.index là vị trí ban đầu của document trong list passages
+                    original_doc = documents[hit.index]
+                    results.append(RerankResult(
+                        text=original_doc["text"],
+                        original_score=original_doc.get("score", 0.0),
+                        rerank_score=float(hit.relevance_score),
+                        metadata=original_doc.get("metadata", {}),
+                        rank=i + 1
+                    ))
+                return results
+            except Exception as e:
+                if "429" in str(e) or "too_many_requests" in str(e).lower():
+                    wait_time = (attempt + 1) * 12
+                    print(f"    ⚠️ Cohere rate limit hit in rerank. Waiting {wait_time}s... (Attempt {attempt+1}/{max_retries})", flush=True)
+                    time.sleep(wait_time)
+                else:
+                    raise e
+        return []
 
 
 class FlashrankReranker:

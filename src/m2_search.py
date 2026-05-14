@@ -105,27 +105,39 @@ class DenseSearch:
 
     def search(self, query: str, top_k: int = DENSE_TOP_K, collection: str = COLLECTION_NAME) -> list[SearchResult]:
         """Search using dense vectors."""
-        response = self._get_encoder().embed(
-            texts=[query],
-            model=EMBEDDING_MODEL,
-            input_type="search_query"
-        )
-        query_vector = response.embeddings[0]
-        
-        # Dùng query_points - API mới nhất của Qdrant
-        response = self.client.query_points(
-            collection_name=collection,
-            query=query_vector,
-            limit=top_k
-        )
-        hits = response.points
-        
-        return [SearchResult(
-            text=hit.payload["text"],
-            score=hit.score,
-            metadata=hit.payload,
-            method="dense"
-        ) for hit in hits]
+        # Retry logic cho Cohere Trial Key (10 calls/min)
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                response = self._get_encoder().embed(
+                    texts=[query],
+                    model=EMBEDDING_MODEL,
+                    input_type="search_query"
+                )
+                query_vector = response.embeddings[0]
+                
+                # Dùng query_points - API mới nhất của Qdrant
+                response = self.client.query_points(
+                    collection_name=collection,
+                    query=query_vector,
+                    limit=top_k
+                )
+                hits = response.points
+                
+                return [SearchResult(
+                    text=hit.payload["text"],
+                    score=hit.score,
+                    metadata=hit.payload,
+                    method="dense"
+                ) for hit in hits]
+            except Exception as e:
+                if "429" in str(e) or "too_many_requests" in str(e).lower():
+                    wait_time = (attempt + 1) * 10
+                    print(f"    ⚠️ Cohere rate limit hit in search. Waiting {wait_time}s... (Attempt {attempt+1}/{max_retries})", flush=True)
+                    time.sleep(wait_time)
+                else:
+                    raise e
+        return []
 
 
 def reciprocal_rank_fusion(results_list: list[list[SearchResult]], k: int = 60,
