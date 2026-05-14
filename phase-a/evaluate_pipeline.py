@@ -50,6 +50,10 @@ def run_evaluation():
         contexts.append(context)
         elapsed = time.time() - start_time
         print(f"  [{i+1}/{len(questions)}] Done ({elapsed:.1f}s)")
+        
+        # Chủ động nghỉ 12s để không bao giờ vượt quá 10 calls/phút của Cohere Trial
+        if i + 1 < len(questions):
+            time.sleep(12)
 
     # 4. Run Ragas Evaluation (M4)
     print("\n⏳ Calculating RAGAS Metrics (Task A.2)...")
