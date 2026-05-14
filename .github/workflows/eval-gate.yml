@@ -19,7 +19,7 @@ jobs:
         run: uv python install 3.12
         
       - name: Install dependencies
-        run: uv pip install -r requirements.txt
+        run: uv pip install --system -r requirements.txt
         
       - name: Run RAG Evaluation
         env:
@@ -31,7 +31,6 @@ jobs:
           
       - name: Check Scores
         run: |
-          # Logic để kiểm tra điểm số từ file JSON (tùy chọn)
           echo "Evaluation completed. Check artifacts for detailed report."
           
       - name: Upload Report
