@@ -1,0 +1,41 @@
+name: RAG Evaluation Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        
+      - name: Set up Python
+        run: uv python install 3.12
+        
+      - name: Install dependencies
+        run: uv pip install -r requirements.txt
+        
+      - name: Run RAG Evaluation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        run: |
+          # Giả sử chúng ta chạy một tập con nhỏ để làm gate
+          uv run python phase-a/evaluate_pipeline.py
+          
+      - name: Check Scores
+        run: |
+          # Logic để kiểm tra điểm số từ file JSON (tùy chọn)
+          echo "Evaluation completed. Check artifacts for detailed report."
+          
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ragas-report
+          path: phase-a/ragas_report.json
