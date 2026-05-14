@@ -57,7 +57,8 @@ class BM25Search:
 
 class DenseSearch:
     def __init__(self):
-        self.client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+        # Sử dụng local storage để không cần chạy server Qdrant riêng
+        self.client = QdrantClient(path="qdrant_storage")
         self._encoder = None
 
     def _get_encoder(self):
